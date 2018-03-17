@@ -3,7 +3,7 @@
     <!-- Always log to console -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 
-        <!-- Encoder: -->
+        <!-- Encoder: pattern of log format. -->
         <encoder>
             <pattern>%d{yyyy-mm-dd HH:mm:ss.SSS} context=%cn %cyan(id=%X{correlationId}) %highlight(%-5level) %logger{16} - %msg [%thread]%n </pattern>
         </encoder>

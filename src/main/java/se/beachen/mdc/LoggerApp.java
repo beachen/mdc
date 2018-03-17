@@ -7,7 +7,6 @@ import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.IntStream;
 
 
@@ -23,11 +22,20 @@ public class LoggerApp {
 		ctx.setName("myContext");
 	}
 
+	// TODO: How to do it in Spring/HttpServletFilter
+	// TODO:
+
 	public static void main(String[] args) {
+
+		executeInParallell();
+
+	}
+
+	static void executeInParallell() {
 
 		// Main thread
 
-		MDC.put("correlationId", UUID.randomUUID().toString());
+		MDC.put("correlationId", "UniqueId");
 		LOGGER.info("Hello from main thread!");
 
 		Map<String, String> context = MDC.getCopyOfContextMap();
@@ -47,9 +55,5 @@ public class LoggerApp {
 		LOGGER.error("Errors are *red*");
 
 		MDC.remove("correlationId");
-
-
-		// TODO: How to do it in Spring/HttpServletFilter
-		// TODO:
 	}
 }
