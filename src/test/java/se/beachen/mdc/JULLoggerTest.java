@@ -5,11 +5,11 @@ import org.junit.Test;
 /**
  * @author Anders Strand
  */
-public class JavaUtilLoggerTest {
+public class JULLoggerTest {
 
 	@Test
 	public void name() {
 
-		JavaUtilLogging.log();
+		JULLogging.log();
 	}
 }

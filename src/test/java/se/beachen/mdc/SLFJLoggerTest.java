@@ -5,7 +5,7 @@ import org.junit.Test;
 /**
  * @author Anders Strand
  */
-public class SLFFJLoggerTest {
+public class SLFJLoggerTest {
 
 	@Test
 	public void testParallellExecution() {

@@ -5,9 +5,9 @@ import java.util.logging.Logger;
 /**
  * @author Anders Strand
  */
-public class JavaUtilLogging {
+public class JULLogging {
 
-	private static final Logger LOG = Logger.getLogger(JavaUtilLogging.class.getName());
+	private static final Logger LOG = Logger.getLogger(JULLogging.class.getName());
 
 	public static void log(){
 
