@@ -5,7 +5,7 @@ import org.junit.Test;
 /**
  * @author Anders Strand
  */
-public class LoggerAppTest {
+public class SLFFJLoggerTest {
 
 	@Test
 	public void testParallellExecution() {
@@ -13,7 +13,7 @@ public class LoggerAppTest {
 		// Given
 
 		// When
-		LoggerApp.executeInParallell();
+		SLFJLogging.executeInParallell();
 
 		// Then
 	}

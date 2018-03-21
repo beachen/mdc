@@ -7,15 +7,24 @@ import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 
 /**
  * @author Anders Strand
  */
-public class LoggerApp {
+public class SLFJLogging {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LoggerApp.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(SLFJLogging.class);
+
+	private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(5);
+
+
 	static
 	{
 		LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -23,13 +32,7 @@ public class LoggerApp {
 	}
 
 	// TODO: How to do it in Spring/HttpServletFilter
-	// TODO:
 
-	public static void main(String[] args) {
-
-		executeInParallell();
-
-	}
 
 	static void executeInParallell() {
 
@@ -50,10 +53,30 @@ public class LoggerApp {
 				MDC.setContextMap(new HashMap<>());
 
 			});
+
 		LOGGER.debug("Debug is black");
 		LOGGER.warn("Warnings are red");
 		LOGGER.error("Errors are *red*");
 
+		RuntimeException rte = new RuntimeException("Hello, this is a runtime exception");
+		LOGGER.error("This is an error with a stack trace", rte);
+
 		MDC.remove("correlationId");
+	}
+
+	void executor(){
+
+		Callable<Integer> task = () -> {
+			try {
+				TimeUnit.SECONDS.sleep(1);
+				return 123;
+			}
+			catch (InterruptedException e) {
+				throw new IllegalStateException("task interrupted", e);
+			}
+		};
+
+		Future<Integer> res = threadPoolExecutor.submit(task);
+
 	}
 }
