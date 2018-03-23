@@ -39,7 +39,7 @@ public class SLFJLogging {
 
 		// Main thread
 
-		MDC.put("correlationId", "UniqueId");
+		MDC.put("correlationId", "request1");
 		LOGGER.info("Hello from main thread!");
 
 		Map<String, String> context = MDC.getCopyOfContextMap();
@@ -71,52 +71,63 @@ public class SLFJLogging {
 	// Spring: https://moelholm.com/2017/07/24/spring-4-3-using-a-taskdecorator-to-copy-mdc-data-to-async-threads/
 	static void executor() throws InterruptedException, ExecutionException, TimeoutException {
 
-		MDC.put("correlationId", "UniqueId");
+		MDC.put("correlationId", "request1");
 		LOGGER.info("Before spawning threads");
+
 		// Using Lambda Expression
-		CompletableFuture<String> future =
-			CompletableFuture
-				.supplyAsync(() -> {
-					try {
+		CompletableFuture<String> heavyWork = heavyWork();
+		CompletableFuture<String> moreHeavyWork = anotherHeavyWork();
 
-						LOGGER.info("Async");
-						TimeUnit.SECONDS.sleep(1);
-						LOGGER.info("Async done");
-					} catch (InterruptedException e) {
-						throw new IllegalStateException(e);
-					}
-					return "Result of the asynchronous computation"; })
-				.thenApplyAsync(val -> {
-					LOGGER.info("APPLY");
-					return val + ", is not applied ";
-					});
-
-		CompletableFuture<String> future2 =
-			CompletableFuture
-				.supplyAsync(() -> {
-					try {
-
-						LOGGER.info("Async 2");
-						TimeUnit.SECONDS.sleep(2);
-						LOGGER.info("Async done");
-					} catch (InterruptedException e) {
-						throw new IllegalStateException(e);
-					}
-					return "Result of the asynchronous computation"; })
-				.thenApplyAsync(val -> {
-					LOGGER.info("APPLY");
-					return val + ", is applied ";
-				});
-
-		CompletableFuture.allOf(future, future2).get();
+		CompletableFuture.allOf(heavyWork, moreHeavyWork).get();
 
 
 
 		LOGGER.info("Wait from async res:");
-		LOGGER.info("Result from async:" + future.get(2, TimeUnit.SECONDS));
+		LOGGER.info("Result from async:" + heavyWork.get(2, TimeUnit.SECONDS));
 		LOGGER.info("Wait from async res DONE:");
 
 
 
+	}
+
+	private static CompletableFuture<String> anotherHeavyWork() {
+
+		LOGGER.info("Another heavy work started!");
+		return CompletableFuture
+			.supplyAsync(() -> {
+				try {
+
+					LOGGER.info("Async 2");
+					TimeUnit.SECONDS.sleep(2);
+					LOGGER.info("Async done");
+				} catch (InterruptedException e) {
+					throw new IllegalStateException(e);
+				}
+				return "Result of the asynchronous computation"; })
+			.thenApplyAsync(val -> {
+				LOGGER.info("APPLY");
+				return val + ", is applied ";
+			});
+	}
+
+	private static CompletableFuture<String> heavyWork() {
+
+		LOGGER.info("Heavy work started!");
+
+		return CompletableFuture
+			.supplyAsync(() -> {
+				try {
+
+					LOGGER.info("Async");
+					TimeUnit.SECONDS.sleep(1);
+					LOGGER.info("Async done");
+				} catch (InterruptedException e) {
+					throw new IllegalStateException(e);
+				}
+				return "Result of the asynchronous computation"; })
+			.thenApplyAsync(val -> {
+				LOGGER.info("APPLY");
+				return val + ", is not applied ";
+				});
 	}
 }
