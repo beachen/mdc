@@ -7,11 +7,12 @@ import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 
@@ -64,19 +65,58 @@ public class SLFJLogging {
 		MDC.remove("correlationId");
 	}
 
-	void executor(){
+	// Completable features examples:
+	// https://www.callicoder.com/java-8-completablefuture-tutorial/
 
-		Callable<Integer> task = () -> {
-			try {
-				TimeUnit.SECONDS.sleep(1);
-				return 123;
-			}
-			catch (InterruptedException e) {
-				throw new IllegalStateException("task interrupted", e);
-			}
-		};
+	// Spring: https://moelholm.com/2017/07/24/spring-4-3-using-a-taskdecorator-to-copy-mdc-data-to-async-threads/
+	static void executor() throws InterruptedException, ExecutionException, TimeoutException {
 
-		Future<Integer> res = threadPoolExecutor.submit(task);
+		MDC.put("correlationId", "UniqueId");
+		LOGGER.info("Before spawning threads");
+		// Using Lambda Expression
+		CompletableFuture<String> future =
+			CompletableFuture
+				.supplyAsync(() -> {
+					try {
+
+						LOGGER.info("Async");
+						TimeUnit.SECONDS.sleep(1);
+						LOGGER.info("Async done");
+					} catch (InterruptedException e) {
+						throw new IllegalStateException(e);
+					}
+					return "Result of the asynchronous computation"; })
+				.thenApplyAsync(val -> {
+					LOGGER.info("APPLY");
+					return val + ", is not applied ";
+					});
+
+		CompletableFuture<String> future2 =
+			CompletableFuture
+				.supplyAsync(() -> {
+					try {
+
+						LOGGER.info("Async 2");
+						TimeUnit.SECONDS.sleep(2);
+						LOGGER.info("Async done");
+					} catch (InterruptedException e) {
+						throw new IllegalStateException(e);
+					}
+					return "Result of the asynchronous computation"; })
+				.thenApplyAsync(val -> {
+					LOGGER.info("APPLY");
+					return val + ", is applied ";
+				});
+
+		CompletableFuture.allOf(future, future2).get();
+
+
+
+		LOGGER.info("Wait from async res:");
+		LOGGER.info("Result from async:" + future.get(2, TimeUnit.SECONDS));
+		LOGGER.info("Wait from async res DONE:");
+
+
 
 	}
 }
